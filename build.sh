@@ -231,8 +231,8 @@ EOF
         # update initctl
         echo ' * /sbin/initctl' 1>&3
         ${sudo} chroot "${image}" bash -c \
-                "dpkg-divert --local --rename --add /sbin/initctl \
-                 ln -sf /bin/true sbin/initctl" 2>&1
+                "dpkg-divert --local --rename --add /sbin/initctl && \
+                 ln -sf /bin/true /sbin/initctl" 2>&1
     fi
 
     # mount
