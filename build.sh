@@ -69,7 +69,7 @@ function docker_bootstrap()
              man-db,\
              manpages"
 
-    echo "-- bootstrap ${distname}" 1>&3
+    echo '-- bootstrap' 1>&3
 
     if [ "$(id -u)" -ne 0 ]
     then
@@ -273,7 +273,7 @@ EOF
 # create image from bootstrap archive
 function docker_import()
 {
-    echo "-- docker import ubuntu:${distname} (from ${image}.tgz)" 1>&3
+    echo "-- docker import ${image}" 1>&3
     docker import "${image}.tar" "${user}/ubuntu:${distname}"
     docker run "${user}/ubuntu:${distname}" \
            echo " * build ${user}/ubuntu:${distname}" 1>&3
