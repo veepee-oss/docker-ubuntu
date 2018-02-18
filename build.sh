@@ -297,7 +297,7 @@ function docker_push()
     echo "-- docker push" 1>&3
     echo " * push ubuntu:${distname}" 1>&3
     docker push "${user}/ubuntu:${distname}"
-    echo " *  push ubuntu:${distid}" 1>&3
+    echo " * push ubuntu:${distid}" 1>&3
     docker push "${user}/ubuntu:${distid}"
 
     for push in latest oldstable stable testing
