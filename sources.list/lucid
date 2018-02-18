@@ -1,0 +1,4 @@
+deb http://mirror.vpgrp.io/ubuntu precise main multiverse restricted universe
+deb http://mirror.vpgrp.io/ubuntu precise-updates main multiverse restricted universe
+deb http://mirror.vpgrp.io/ubuntu precise-backports main multiverse restricted universe
+deb http://old-releases.ubuntu.com/ubuntu lucid-security main multiverse restricted universe

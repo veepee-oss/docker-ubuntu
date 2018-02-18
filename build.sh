@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1039
+# shellcheck disable=SC2034
 
 set -e
 
-PATH='/usr/sbin:/usr/bin:/sbin:/bin'
+PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 arch='amd64'
-version='3.0'
+oldstable='trusty'
+stable='xenial'
+testing='bionic'
+version='4.0'
 
 function usage()
 {
@@ -22,9 +27,6 @@ OPTIONS:
 
    -d, --dist           Choose Ubuntu distribution
                         eg: lucid, precise, trusty, xenial
-
-   -m, --mirror         Choose your preferred mirror
-                        default: archive.ubuntu.com
 
    -t, --timezone       Choose your preferred timezone
                         default: Europe/Amsterdam
@@ -43,18 +45,29 @@ OPTIONS:
    -V, --version        Show version
 
 VERSION:
-   docker-debian version: ${version}
+   docker-ubuntu version: ${version}
 
 EOF
 }
 
-function docker_debootstrap()
+function docker_bootstrap()
 {
     # variables
     image="/tmp/image-${distname}-${arch}"
-    include="${include} apt-transport-https,apt-utils,ca-certificates,curl,git-core,locales"
-    exclude='debconf-i18n,dmsetup,git-man,info,initramfs-tools,man-db,manpages'
-    components='main multiverse restricted universe'
+    include="${include},\
+             apt-transport-https,\
+             apt-utils,\
+             ca-certificates,\
+             curl,\
+             git-core,\
+             locales"
+    exclude='debconf-i18n,\
+             dmsetup,\
+             git-man,\
+             info,\
+             initramfs-tools,\
+             man-db,\
+             manpages'
 
     echo "-- bootstrap ${distname}" 1>&3
 
@@ -70,14 +83,15 @@ function docker_debootstrap()
     fi
 
     # create minimal debootstrap image
-    echo " * debootstrap" 1>&3
-    if [ ! -f "/usr/share/debootstrap/scripts/${distname}" ] || [ ! -h "/usr/share/debootstrap/scripts/${distname}" ]
+    if [ ! -f "/usr/share/debootstrap/scripts/${distname}" ] || \
+       [ ! -h "/usr/share/debootstrap/scripts/${distname}" ]
     then
-	echo "/!\ File /usr/share/debootstrap/scripts/${distname} is missing." 1>&3
+        echo "File /usr/share/debootstrap/scripts/${distname} is missing." 1>&3
         echo "1.) did you install backports version of debootstrap ?" 1>&3
-	echo "2.) run sudo ln -s gutsy /usr/share/debootstrap/scripts/${distname}" 1>&3
+        echo "2.) ln -s gutsy /usr/share/debootstrap/scripts/${distname}" 1>&3
         exit 1
     else
+        echo " * debootstrap ${image}" 1>&3
         ${sudo} debootstrap \
                 --arch="${arch}" \
                 --include="${include}" \
@@ -85,17 +99,19 @@ function docker_debootstrap()
                 --variant=minbase \
                 "${distname}" \
                 "${image}" \
-                "http://${mirror}/ubuntu"
+                "${mirror}"
         if [ ${?} -ne 0 ]
         then
-	    echo "/!\ There is an issue with debootstrap, please run again with -v (verbose)." 1>&3
+            echo "There is an issue Issue with debootstrap." 1>&3
+            echo "Please run again with -v." 1>&3
             exit 1
         fi
     fi
 
     # create /etc/default/locale
     echo ' * /etc/default/locale' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/default/locale"
+    cat <<EOF | \
+        ${sudo} tee "${image}/etc/default/locale"
 LANG=en_US.UTF-8
 LANGUAGE=en_US.UTF-8
 LC_COLLATE=en_US.UTF-8
@@ -104,49 +120,29 @@ EOF
 
     # create /etc/timezone
     echo ' * /etc/timezone' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/timezone"
+    cat <<EOF | \
+        ${sudo} tee "${image}/etc/timezone"
 ${timezone}
 EOF
 
     # create /etc/resolv.conf
     echo ' * /etc/resolv.conf' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/resolv.conf"
+    cat <<EOF | \
+        ${sudo} tee "${image}/etc/resolv.conf"
 nameserver 8.8.4.4
 nameserver 8.8.8.8
 EOF
 
     # create /etc/apt/sources.list
     echo ' * /etc/apt/sources.list' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/apt/sources.list"
-deb http://${mirror}/ubuntu ${distname} ${components}
-deb http://${mirror}/ubuntu ${distname}-updates ${components}
-EOF
-
-    # create /etc/apt/sources.list.d/backports.list
-    echo ' * /etc/apt/sources.list.d/backports.list' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/apt/sources.list.d/backports.list"
-deb http://${mirror}/ubuntu ${distname}-backports ${components}
-EOF
-
-    # create /etc/apt/sources.list.d/security.list
-    echo ' * /etc/apt/sources.list.d/security.list' 1>&3
-    if [ "${distname}" != 'lucid' ]
-    then
-        cat <<EOF | ${sudo} tee "${image}/etc/apt/sources.list.d/security.list"
-deb http://security.ubuntu.com/ubuntu ${distname}-security ${components}
-EOF
-    else
-        cat <<EOF | ${sudo} tee "${image}/etc/apt/sources.list.d/security.list"
-deb http://old-releases.ubuntu.com/ubuntu ${distname}-security ${components}
-EOF
-    fi
+    ${sudo} cp -r "sources.list/${distname}" "${image}/etc/apt/sources.list"
 
     if [ "${distname}" != 'lucid' ]
     then
        # create /etc/dpkg/dpkg.cfg.d/disable-doc
-       # thanks to http://askubuntu.com/questions/129566/remove-documentation-to-save-hard-drive-space
        echo ' * /etc/dpkg/dpkg.cfg.d/disable-doc' 1>&3
-       cat <<EOF | ${sudo} tee "${image}/etc/dpkg/dpkg.cfg.d/disable-doc"
+       cat <<EOF | \
+           ${sudo} tee "${image}/etc/dpkg/dpkg.cfg.d/disable-doc"
 path-exclude /usr/share/doc/*
 path-include /usr/share/doc/*/copyright
 path-exclude /usr/share/man/*
@@ -158,32 +154,32 @@ EOF
     fi
 
     # create /etc/apt/apt.conf.d/force-ipv4
-    # thanks to https://github.com/cw-ansible/cw.apt/
     echo ' * /etc/apt/apt.conf.d/force-ipv4' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/apt/apt.conf.d/force-ipv4"
+    cat <<EOF | \
+        ${sudo} tee "${image}/etc/apt/apt.conf.d/force-ipv4"
 Acquire::ForceIPv4 "true";
 EOF
 
     # create /etc/apt/apt.conf.d/disable-auto-install
-    # thanks to https://github.com/cw-ansible/cw.apt/
     echo ' * /etc/apt/apt.conf.d/disable-auto-install' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/apt/apt.conf.d/disable-auto-install"
+    cat <<EOF | \
+        ${sudo} tee "${image}/etc/apt/apt.conf.d/disable-auto-install"
 APT::Install-Recommends "0";
 APT::Install-Suggests "0";
 EOF
 
     # create /etc/apt/apt.conf.d/disable-cache
-    # thanks to https://github.com/docker/docker/blob/master/contrib/mkimage-debootstrap.sh
     echo ' * /etc/apt/apt.conf.d/disable-cache' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/apt/apt.conf.d/disable-cache"
+    cat <<EOF | \
+        ${sudo} tee "${image}/etc/apt/apt.conf.d/disable-cache"
 Dir::Cache::pkgcache "";
 Dir::Cache::srcpkgcache "";
 EOF
 
     # create /etc/apt/apt.conf.d/force-conf
-    # thanks to https://raphaelhertzog.com/2010/09/21/debian-conffile-configuration-file-managed-by-dpkg/
     echo ' * /etc/apt/apt.conf.d/force-conf' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/apt/apt.conf.d/force-conf"
+    cat <<EOF | \
+        ${sudo} tee "${image}/etc/apt/apt.conf.d/force-conf"
 Dpkg::Options {
    "--force-confnew";
    "--force-confmiss";
@@ -191,15 +187,16 @@ Dpkg::Options {
 EOF
 
     # create /etc/apt/apt.conf.d/disable-languages
-    # thanks to https://github.com/docker/docker/blob/master/contrib/mkimage-debootstrap.sh
     echo ' * /etc/apt/apt.conf.d/disable-languages' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/etc/apt/apt.conf.d/disable-languages"
+    cat <<EOF | \
+        ${sudo} tee "${image}/etc/apt/apt.conf.d/disable-languages"
 Acquire::Languages "none";
 EOF
 
     # create /usr/bin/apt-clean
     echo ' * /usr/bin/apt-clean' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/usr/bin/apt-clean"
+    cat <<EOF | \
+        ${sudo} tee "${image}/usr/bin/apt-clean"
 #!/bin/bash
 
 # Please read https://wiki.ubuntu.com/ReducingDiskFootprint
@@ -210,17 +207,18 @@ find /usr/share/locale  -type f -delete
 find /usr/share/man     -type f -delete
 find /var/cache/apt     -type f -delete
 find /var/lib/apt/lists -type f -delete
-apt-get autoclean -qq -y
-apt-get autoremove -qq -y
-apt-get clean -qq -y
+
+apt-get autoclean       -qq -y
+apt-get autoremove      -qq -y
+apt-get clean           -qq -y
 # EOF
 EOF
     ${sudo} chmod 755 "${image}/usr/bin/apt-clean"
 
     # create /usr/sbin/policy-rc.d
-    # thanks to https://github.com/docker/docker/blob/master/contrib/mkimage-debootstrap.sh
     echo ' * /usr/sbin/policy-rc.d' 1>&3
-    cat <<EOF | ${sudo} tee "${image}/usr/sbin/policy-rc.d"
+    cat <<EOF | \
+        ${sudo} tee "${image}/usr/sbin/policy-rc.d"
 #!/bin/bash
 
 exit 101
@@ -231,7 +229,6 @@ EOF
     if [ "${distname}" != 'lucid' ]
     then
         # update initctl
-	# thanks to https://github.com/docker/docker/blob/master/contrib/mkimage-debootstrap.sh
         echo ' * /sbin/initctl' 1>&3
         ${sudo} chroot "${image}" bash -c \
                 "dpkg-divert --local --rename --add /sbin/initctl \
@@ -254,12 +251,10 @@ EOF
             "export DEBIAN_FRONTEND=noninteractive && \
              export LC_ALL=en_US.UTF-8 && \
              update-ca-certificates -f && \
-             apt-get update -qq && \
-             apt-get upgrade -qq -y && \
-             apt-get dist-upgrade -qq -y && \
-             apt-get autoclean -qq -y && \
-             apt-get autoremove -qq -y && \
-             apt-get clean -qq -y" 2>&1
+             apt-get update && \
+             apt-get upgrade -y && \
+             apt-get dist-upgrade -y && \
+             apt-clan"
 
     # unmount
     ${sudo} umount "${image}/dev/pts"
@@ -267,20 +262,12 @@ EOF
     ${sudo} umount "${image}/proc"
     ${sudo} umount "${image}/sys"
 
-    # clean
-    ${sudo} find   "${image}/usr/share/doc"     -type f ! -name copyright -delete
-    ${sudo} find   "${image}/usr/share/i18n"    -type f -delete
-    ${sudo} find   "${image}/usr/share/locale"  -type f -delete
-    ${sudo} find   "${image}/usr/share/man"     -type f -delete
-    ${sudo} find   "${image}/var/cache/apt"     -type f -delete
-    ${sudo} find   "${image}/var/lib/apt/lists" -type f -delete
-
     # create archive
     if [ -f "${image}.tar" ]
     then
         ${sudo} rm "${image}.tar"
     fi
-    ${sudo} tar --numeric-owner -cf "${image}.tar" -C "${image}" .
+    ${sudo} tar -C "${image}" -c -f "${image}.tar" --numeric-owner .
 }
 
 # create image from bootstrap archive
@@ -288,21 +275,43 @@ function docker_import()
 {
     echo "-- docker import ubuntu:${distname} (from ${image}.tgz)" 1>&3
     docker import "${image}.tar" "${user}/ubuntu:${distname}"
-    docker run "${user}/ubuntu:${distname}" echo "Successfully build ${user}/ubuntu:${distname}" 1>&3
+    docker run "${user}/ubuntu:${distname}" \
+           echo " * build ${user}/ubuntu:${distname}" 1>&3
     docker tag "${user}/ubuntu:${distname}" "${user}/ubuntu:${distid}"
-    docker run "${user}/ubuntu:${distid}" echo "Successfully build ${user}/ubuntu:${distid}" 1>&3
+    docker run "${user}/ubuntu:${distid}" \
+           echo " * build ${user}/ubuntu:${distid}" 1>&3
+
+    for import in latest oldstable stable testing
+    do
+        if [ "${distname}" = "${!import}" ]
+        then
+            docker tag "${user}/ubuntu:${distname}" "${user}/ubuntu:${import}"
+            docker run "${user}/ubuntu:${import}" \
+                   echo " * build ${user}/ubuntu:${import}" 1>&3
+        fi
+    done
 }
 
 # push image to docker hub
 function docker_push()
 {
-    echo "-- docker push ubuntu:${distname}" 1>&3
+    echo "-- docker push" 1>&3
+    echo " * push ubuntu:${distname}" 1>&3
     docker push "${user}/ubuntu:${distname}"
-    echo "-- docker push ubuntu:${distid}" 1>&3
+    echo " *  push ubuntu:${distid}" 1>&3
     docker push "${user}/ubuntu:${distid}"
+
+    for push in latest oldstable stable testing
+    do
+        if [ "${distname}" = "${!push}"  ]
+        then
+            echo " * push ${user}/ubuntu:${push}" 1>&3
+            docker push "${user}/ubuntu:${push}"
+        fi
+    done
 }
 
-while getopts 'hd:m:t:u:plvV' OPTIONS
+while getopts 'hd:t:u:plvV' OPTIONS
 do
     case ${OPTIONS} in
         h)
@@ -313,10 +322,6 @@ do
         d)
             # -d / --dist
             dist=${OPTARG}
-            ;;
-        m)
-            # -m / --mirror
-            mirror=${OPTARG}
             ;;
         t)
             # -t / --timezone
@@ -369,20 +374,23 @@ then
         lucid|10.04|10.04-lts)
             distname='lucid'
             distid='10.04'
-            mirror='old-releases.ubuntu.com'
+            mirror='http://old-releases.ubuntu.com/ubuntu'
             include='gpgv'
             ;;
         precise|12.04|12.04-lts)
             distname='precise'
             distid='12.04'
+            mirror='http://mirror.vpgrp.io/ubuntu'
             ;;
         trusty|14.04|14.04-lts)
             distname='trusty'
             distid='14.04'
+            mirror='http://mirror.vpgrp.io/ubuntu'
             ;;
         xenial|16.04|16.04-lts)
             distname='xenial'
             distid='16.04'
+            mirror='http://mirror.vpgrp.io/ubuntu'
             ;;
         *)
             usage
@@ -392,12 +400,6 @@ then
 else
     usage
     exit 1
-fi
-
-# -m / --mirror
-if [ -z "${mirror}" ]
-then
-    mirror='archive.ubuntu.com'
 fi
 
 # -t / --timezone
@@ -428,7 +430,7 @@ else
     exec 3>&1
 fi
 
-docker_debootstrap
+docker_bootstrap
 docker_import
 
 if [ -n "${push}" ]

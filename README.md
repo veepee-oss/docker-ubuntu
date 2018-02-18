@@ -1,4 +1,7 @@
-# docker-ubuntu ![License][license-img]
+# docker-ubuntu
+[![License][license-img]][license-href]
+[![pipeline][pipeline-img]][pipeline-href]
+[![docker][docker-img]][docker-href]
 
 ## Overview
 
@@ -87,7 +90,8 @@ Only work on Debian, Devuan and Ubuntu.
 
 ## Development
 
-Please read carefully CONTRIBUTING.md before making a merge request.
+Please read carefully [CONTRIBUTING.md][contribute-href]  before making a merge
+request.
 
 ## Miscellaneous
 
@@ -102,7 +106,9 @@ Please read carefully CONTRIBUTING.md before making a merge request.
 ```
 
 [license-img]: https://img.shields.io/badge/license-Apache-blue.svg
-[build-img]: https://travis-ci.org/vpgrp/docker-ubuntu.svg?branch=master
-[build-url]: https://travis-ci.org/vpgrp/docker-ubuntu
+[license-href]: /LICENSE
+[pipeline-img]: https://git.vpgrp.io/docker/docker-ubuntu/badges/master/pipeline.svg
+[pipeline-href]: https://git.vpgrp.io/docker/docker-ubuntu/commits/master
 [docker-img]: https://img.shields.io/docker/pulls/vpgrp/ubuntu.svg
-[docker-url]: https://registry.hub.docker.com/u/vpgrp/ubuntu
+[docker-href]: https://registry.hub.docker.com/u/vpgrp/ubuntu
+[contribute-href]: /CONTRIBUTING.md

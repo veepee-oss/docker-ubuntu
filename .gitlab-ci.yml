@@ -1,0 +1,44 @@
+---
+# https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
+
+stages:
+  - commit
+  - syntax
+  - docker
+
+# commit
+git-history:
+  stage: commit
+  script:
+    - >
+      bash <(curl -s
+      https://gitlab.com/yue-script/checks/raw/master/check_git_history.sh)
+
+# syntax
+shellcheck:
+  stage: syntax
+  image: vpgrp/linter:shell
+  script:
+    - shellcheck build.sh
+
+# build
+# build-jessie:
+#   stage: docker
+#   image: vpgrp/debian:jessie
+#   before_script:
+#     - apt-get update  -qq -y
+#     - apt-get install -qq -y debootstrap sudo
+#     - apt-get install -qq -y debian-keyring debian-archive-keyring
+#   script:
+#     - ./build.sh -d jessie -u vpgrp
+
+# build-stretch:
+#   stage: docker
+#   image: vpgrp/debian:stretch
+#   before_script:
+#     - apt-get update  -qq -y
+#     - apt-get install -qq -y debootstrap sudo
+#     - apt-get install -qq -y debian-keyring debian-archive-keyring
+#   script:
+#     - ./build.sh -d stretch -u vpgrp
+# EOF
