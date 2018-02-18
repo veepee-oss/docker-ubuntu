@@ -249,12 +249,11 @@ EOF
     echo ' * apt-get upgrade' 1>&3
     ${sudo} chroot "${image}" bash -c \
             "export DEBIAN_FRONTEND=noninteractive && \
-             export LC_ALL=en_US.UTF-8 && \
              update-ca-certificates -f && \
              apt-get update && \
              apt-get upgrade -y && \
              apt-get dist-upgrade -y && \
-             apt-clan"
+             apt-clean"
 
     # unmount
     ${sudo} umount "${image}/dev/pts"
