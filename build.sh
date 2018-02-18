@@ -61,13 +61,13 @@ function docker_bootstrap()
              curl,\
              git-core,\
              locales"
-    exclude='debconf-i18n,\
+    exclude="debconf-i18n,\
              dmsetup,\
              git-man,\
              info,\
              initramfs-tools,\
              man-db,\
-             manpages'
+             manpages"
 
     echo "-- bootstrap ${distname}" 1>&3
 
