@@ -1,7 +1,17 @@
 # docker-ubuntu
+
 [![License][license-img]][license-href]
 [![pipeline][pipeline-img]][pipeline-href]
 [![docker][docker-img]][docker-href]
+
+1. [Overview](#overview)
+2. [Description](#description)
+3. [Tags](#tags)
+4. [Setup](#setup)
+5. [Usage](#usage)
+6. [Limitations](#limitations)
+7. [Development](#development)
+8. [Miscellaneous](#miscellaneous)
 
 ## Overview
 
@@ -9,7 +19,7 @@ Ubuntu is  a Debian-based  free operating  system (OS)  for your  computer.  An
 operating system  is the  set of  basic programs and  utilities that  make your
 computer run.
 
-[ubuntu.com](https://www.ubuntu.com/)
+[ubuntu.com][overview-href]
 
 ## Description
 
@@ -27,7 +37,7 @@ Supported tags.
 - 14.04, trusty
 - 16.04, xenial, latest
 
-## Requirements
+## Setup
 
 On Debian you need sudo permissions and the following packages:
 
@@ -106,9 +116,10 @@ request.
 ```
 
 [license-img]: https://img.shields.io/badge/license-Apache-blue.svg
-[license-href]: /LICENSE
+[license-href]: LICENSE
 [pipeline-img]: https://git.vpgrp.io/docker/docker-ubuntu/badges/master/pipeline.svg
 [pipeline-href]: https://git.vpgrp.io/docker/docker-ubuntu/commits/master
 [docker-img]: https://img.shields.io/docker/pulls/vpgrp/ubuntu.svg
 [docker-href]: https://registry.hub.docker.com/u/vpgrp/ubuntu
-[contribute-href]: /CONTRIBUTING.md
+[overview-href]: https://www.ubuntu.com/
+[contribute-href]: CONTRIBUTING.md
