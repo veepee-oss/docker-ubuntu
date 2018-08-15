@@ -26,7 +26,7 @@ OPTIONS:
    -h, --help           Show help
 
    -d, --dist           Choose Ubuntu distribution
-                        eg: lucid, precise, trusty, xenial
+                        eg: lucid, precise, trusty, xenial, bionic
 
    -t, --timezone       Choose your preferred timezone
                         default: Europe/Amsterdam
@@ -38,7 +38,7 @@ OPTIONS:
                         default: no
 
    -l, --latest         Force the "latest"
-                        default: xenial
+                        default: bionic
 
    -v, --verbose        Verbose mode
 
@@ -55,11 +55,9 @@ function docker_bootstrap()
     # variables
     image="/tmp/image-${distname}-${arch}"
     include="${include},\
-             apt-transport-https,\
              apt-utils,\
              ca-certificates,\
              curl,\
-             git-core,\
              locales"
     exclude="debconf-i18n,\
              dmsetup,\
@@ -88,7 +86,7 @@ function docker_bootstrap()
     then
         echo "File /usr/share/debootstrap/scripts/${distname} is missing." 1>&3
         echo "1.) did you install backports version of debootstrap ?" 1>&3
-        echo "2.) ln -s bionic /usr/share/debootstrap/scripts/${distname}" 1>&3
+        echo "2.) ln -s gusty /usr/share/debootstrap/scripts/${distname}" 1>&3
         exit 1
     else
         echo " * debootstrap ${image}" 1>&3
@@ -374,22 +372,25 @@ then
             distname='lucid'
             distid='10.04'
             mirror='http://old-releases.ubuntu.com/ubuntu'
-            include='gpgv'
+            include='apt-transport-https,git-core,gpgv'
             ;;
         precise|12.04|12.04-lts)
             distname='precise'
             distid='12.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
+	    include='apt-transport-https,git-core'
             ;;
         trusty|14.04|14.04-lts)
             distname='trusty'
             distid='14.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
+	    include='apt-transport-https,git-core'
             ;;
         xenial|16.04|16.04-lts)
             distname='xenial'
             distid='16.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
+	    include='apt-transport-https,git-core'
             ;;
         bionic|18.04|18.04-lts)
             distname='bionic'
