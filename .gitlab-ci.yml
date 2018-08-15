@@ -18,9 +18,10 @@
 .template: &deploy
   before_script:
     - docker login -u "$VPGRP_CI_USER" -p "$VPGRP_CI_PASSWORD"
-    - docker load -i image/wheezy.tar
-    - docker load -i image/jessie.tar
-    - docker load -i image/stretch.tar
+    - docker load -i image/precise.tar
+    - docker load -i image/trusty.tar
+    - docker load -i image/xenial.tar
+    - docker load -i image/bionic.tar
   image: docker:latest
   only:
     - master
