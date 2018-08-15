@@ -7,8 +7,8 @@ set -e
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 arch='amd64'
-oldstable='trusty'
-stable='xenial'
+oldstable='xenial'
+stable='bionic'
 testing='bionic'
 version='4.0'
 
@@ -32,7 +32,7 @@ OPTIONS:
                         default: Europe/Amsterdam
 
    -u, --user           Docker Hub username or organisation
-                        default: $USER
+                        default: none
 
    -p, --push           Docker Hub push
                         default: no
@@ -273,20 +273,20 @@ EOF
 function docker_import()
 {
     echo "-- docker import ${image}" 1>&3
-    docker import "${image}.tar" "${user}/ubuntu:${distname}"
-    docker run "${user}/ubuntu:${distname}" \
-           echo " * build ${user}/ubuntu:${distname}" 1>&3
-    docker tag "${user}/ubuntu:${distname}" "${user}/ubuntu:${distid}"
-    docker run "${user}/ubuntu:${distid}" \
-           echo " * build ${user}/ubuntu:${distid}" 1>&3
+    docker import "${image}.tar" "${user}ubuntu:${distname}"
+    docker run "${user}ubuntu:${distname}" \
+           echo " * build ${user}ubuntu:${distname}" 1>&3
+    docker tag "${user}ubuntu:${distname}" "${user}ubuntu:${distid}"
+    docker run "${user}ubuntu:${distid}" \
+           echo " * build ${user}ubuntu:${distid}" 1>&3
 
     for import in latest oldstable stable testing
     do
         if [ "${distname}" = "${!import}" ]
         then
-            docker tag "${user}/ubuntu:${distname}" "${user}/ubuntu:${import}"
-            docker run "${user}/ubuntu:${import}" \
-                   echo " * build ${user}/ubuntu:${import}" 1>&3
+            docker tag "${user}ubuntu:${distname}" "${user}ubuntu:${import}"
+            docker run "${user}ubuntu:${import}" \
+                   echo " * build ${user}ubuntu:${import}" 1>&3
         fi
     done
 }
@@ -295,17 +295,17 @@ function docker_import()
 function docker_push()
 {
     echo "-- docker push" 1>&3
-    echo " * push ${user}/ubuntu:${distname}" 1>&3
-    docker push "${user}/ubuntu:${distname}"
-    echo " * push ${user}/ubuntu:${distid}" 1>&3
-    docker push "${user}/ubuntu:${distid}"
+    echo " * push ${user}ubuntu:${distname}" 1>&3
+    docker push "${user}ubuntu:${distname}"
+    echo " * push ${user}ubuntu:${distid}" 1>&3
+    docker push "${user}ubuntu:${distid}"
 
     for push in latest oldstable stable testing
     do
         if [ "${distname}" = "${!push}"  ]
         then
-            echo " * push ${user}/ubuntu:${push}" 1>&3
-            docker push "${user}/ubuntu:${push}"
+            echo " * push ${user}ubuntu:${push}" 1>&3
+            docker push "${user}ubuntu:${push}"
         fi
     done
 }
@@ -328,7 +328,7 @@ do
             ;;
         u)
             # -u / --user
-            user=${OPTARG}
+            user="${OPTARG}/"
             ;;
         p)
             # -p / --push
@@ -391,6 +391,11 @@ then
             distid='16.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
             ;;
+        bionic|18.04|18.04-lts)
+            distname='bionic'
+            distid='18.04'
+            mirror='http://mirror.vpgrp.io/ubuntu'
+            ;;
         *)
             usage
             exit 1
@@ -410,13 +415,13 @@ fi
 # -u / --user
 if [ -z "${user}" ]
 then
-    user=${USER}
+    user=''
 fi
 
 # -l / --latest
 if [ -z "${latest}" ]
 then
-    latest='xenial'
+    latest='bionic'
 fi
 
 # -v / --verbose

@@ -32,10 +32,10 @@ all of our images are accurates.
 
 Supported tags.
 
-- 10.04, lucid
 - 12.04, precise
 - 14.04, trusty
-- 16.04, xenial, latest
+- 16.04, xenial
+- 18.04, bionic, latest
 
 ## Setup
 

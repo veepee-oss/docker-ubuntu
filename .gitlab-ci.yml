@@ -1,19 +1,54 @@
 ---
 # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
 
+.template: &build
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - image
+  before_script:
+    - apt-get update -qq && apt-get install -qq -y debootstrap
+  image: vpgrp/kitchen:latest
+  stage: build
+  variables:
+    DOCKER_DRIVER: overlay
+
+.template: &deploy
+  before_script:
+    - docker login -u "$VPGRP_CI_USER" -p "$VPGRP_CI_PASSWORD"
+    - docker load -i image/wheezy.tar
+    - docker load -i image/jessie.tar
+    - docker load -i image/stretch.tar
+  image: docker:latest
+  only:
+    - master
+  services:
+    - docker:dind
+  stage: deploy
+  variables:
+    DOCKER_DRIVER: overlay
+
 stages:
   - commit
   - syntax
-  - docker
+  - build
+  - deploy
 
 # commit
 git-history:
   stage: commit
   script:
     - >
-      bash <(curl -fsS
-      https://gitlab.com/yue-script/checks/raw/master/check_git_history.sh)
-      100
+      bash <(curl --fail --location --silent --show-error
+      https://git.io/vxIxF)
+
+lines-length:
+  stage: commit
+  script:
+    - >
+      bash <(curl --fail --location --silent --show-error
+      https://git.io/vxIxN)
+      *.list
 
 # syntax
 shellcheck:
@@ -23,23 +58,78 @@ shellcheck:
     - shellcheck build.sh
 
 # build
-# build-jessie:
-#   stage: docker
-#   image: vpgrp/debian:jessie
-#   before_script:
-#     - apt-get update  -qq -y
-#     - apt-get install -qq -y debootstrap sudo
-#     - apt-get install -qq -y debian-keyring debian-archive-keyring
-#   script:
-#     - ./build.sh -d jessie -u vpgrp
+precise:
+  <<: *build
+  script:
+    - ./build.sh -d precise
+    - mkdir image
+    - docker save ubuntu:precise > image/precise.tar
 
-# build-stretch:
-#   stage: docker
-#   image: vpgrp/debian:stretch
-#   before_script:
-#     - apt-get update  -qq -y
-#     - apt-get install -qq -y debootstrap sudo
-#     - apt-get install -qq -y debian-keyring debian-archive-keyring
-#   script:
-#     - ./build.sh -d stretch -u vpgrp
+trusty:
+  <<: *build
+  script:
+    - ./build.sh -d trusty
+    - mkdir image
+    - docker save ubuntu:trusty > image/trusty.tar
+
+xenial:
+  <<: *build
+  script:
+    - ./build.sh -d xenial
+    - mkdir image
+    - docker save ubuntu:xenial > image/xenial.tar
+
+bionic:
+  <<: *build
+  script:
+    - ./build.sh -d bionic
+    - mkdir image
+    - docker save ubuntu:bionic > image/bionic.tar
+
+# deploy
+# https://hub.docker.com/u/vpgrp/
+vpgrp:
+  <<: *deploy
+  script:
+    - docker tag ubuntu:precise vpgrp/ubuntu:precise
+    - docker tag ubuntu:precise vpgrp/ubuntu:12.04
+    - docker tag ubuntu:trusty  vpgrp/ubuntu:trusty
+    - docker tag ubuntu:trusty  vpgrp/ubuntu:14.04
+    - docker tag ubuntu:xenial  vpgrp/ubuntu:xenial
+    - docker tag ubuntu:xenial  vpgrp/ubuntu:16.04
+    - docker tag ubuntu:bionic  vpgrp/ubuntu:bionic
+    - docker tag ubuntu:bionic  vpgrp/ubuntu:18.04
+    - docker tag ubuntu:bionic  vpgrp/ubuntu:latest
+    - docker push vpgrp/ubuntu:precise
+    - docker push vpgrp/ubuntu:12.04
+    - docker push vpgrp/ubuntu:trusty
+    - docker push vpgrp/ubuntu:14.04
+    - docker push vpgrp/ubuntu:xenial
+    - docker push vpgrp/ubuntu:16.04
+    - docker push vpgrp/ubuntu:bionic
+    - docker push vpgrp/ubuntu:18.04
+    - docker push vpgrp/ubuntu:latest
+
+# https://hub.docker.com/u/vptech/
+vptech:
+  <<: *deploy
+  script:
+    - docker tag ubuntu:precise vptech/ubuntu:precise
+    - docker tag ubuntu:precise vptech/ubuntu:12.04
+    - docker tag ubuntu:trusty  vptech/ubuntu:trusty
+    - docker tag ubuntu:trusty  vptech/ubuntu:14.04
+    - docker tag ubuntu:xenial  vptech/ubuntu:xenial
+    - docker tag ubuntu:xenial  vptech/ubuntu:16.04
+    - docker tag ubuntu:bionic  vptech/ubuntu:bionic
+    - docker tag ubuntu:bionic  vptech/ubuntu:18.04
+    - docker tag ubuntu:bionic  vptech/ubuntu:latest
+    - docker push vptech/ubuntu:precise
+    - docker push vptech/ubuntu:12.04
+    - docker push vptech/ubuntu:trusty
+    - docker push vptech/ubuntu:14.04
+    - docker push vptech/ubuntu:xenial
+    - docker push vptech/ubuntu:16.04
+    - docker push vptech/ubuntu:bionic
+    - docker push vptech/ubuntu:18.04
+    - docker push vptech/ubuntu:latest
 # EOF
