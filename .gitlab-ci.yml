@@ -7,7 +7,7 @@
     paths:
       - image
   before_script:
-    - apt-get update -qq && apt-get install -qq -y debootstrap
+    - apt-get update && apt-get install -t stretch-backports -y debootstrap
   image: vpgrp/kitchen:latest
   stage: build
   variables:

@@ -88,7 +88,7 @@ function docker_bootstrap()
     then
         echo "File /usr/share/debootstrap/scripts/${distname} is missing." 1>&3
         echo "1.) did you install backports version of debootstrap ?" 1>&3
-        echo "2.) ln -s gutsy /usr/share/debootstrap/scripts/${distname}" 1>&3
+        echo "2.) ln -s bionic /usr/share/debootstrap/scripts/${distname}" 1>&3
         exit 1
     else
         echo " * debootstrap ${image}" 1>&3
