@@ -26,7 +26,7 @@ OPTIONS:
    -h, --help           Show help
 
    -d, --dist           Choose Ubuntu distribution
-                        eg: lucid, precise, trusty, xenial, bionic
+                        eg: precise, trusty, xenial, bionic
 
    -t, --timezone       Choose your preferred timezone
                         default: Europe/Amsterdam
@@ -378,7 +378,7 @@ then
             distname='precise'
             distid='12.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
-	    include='apt-transport-https,git-core'
+	        include='apt-transport-https,git-core'
             ;;
         trusty|14.04|14.04-lts)
             distname='trusty'
@@ -390,7 +390,7 @@ then
             distname='xenial'
             distid='16.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
-	    include='apt-transport-https,git-core'
+	        include='apt-transport-https,git-core'
             ;;
         bionic|18.04|18.04-lts)
             distname='bionic'
