@@ -65,7 +65,7 @@ v16.04:
     - mkdir image
     - docker save ubuntu:xenial > image/v16.04.tar
 
-v18.94:
+v18.04:
   <<: *build
   script:
     - ./build.sh -d bionic -v
