@@ -20,10 +20,10 @@
   image: docker:latest
   before_script:
     - docker login -u "$REGISTRY_USERNAME" -p "$REGISTRY_PASSWORD"
-    - docker load -i image/v12.04.tar
-    - docker load -i image/v14.04.tar
-    - docker load -i image/v16.04.tar
-    - docker load -i image/v18.04.tar
+    - docker load -i image/ubuntu-v12.04.tar
+    - docker load -i image/ubuntu-v14.04.tar
+    - docker load -i image/ubuntu-v16.04.tar
+    - docker load -i image/ubuntu-v18.04.tar
   only:
     - master
   services:
@@ -49,28 +49,28 @@ v12.04:
   script:
     - ./build.sh -d precise  -v
     - mkdir image
-    - docker save ubuntu:precise > image/v12.04.tar
+    - docker save ubuntu:precise > image/ubuntu-v12.04.tar
 
 v14.04:
   <<: *build
   script:
     - ./build.sh -d trusty -v
     - mkdir image
-    - docker save ubuntu:trusty > image/v14.04.tar
+    - docker save ubuntu:trusty > image/ubuntu-v14.04.tar
 
 v16.04:
   <<: *build
   script:
     - ./build.sh -d xenial -v
     - mkdir image
-    - docker save ubuntu:xenial > image/v16.04.tar
+    - docker save ubuntu:xenial > image/ubuntu-v16.04.tar
 
 v18.04:
   <<: *build
   script:
     - ./build.sh -d bionic -v
     - mkdir image
-    - docker save ubuntu:bionic > image/v18.04.tar
+    - docker save ubuntu:bionic > image/ubuntu-v18.04.tar
 
 # deploy
 # https://hub.docker.com/u/vpgrp/
