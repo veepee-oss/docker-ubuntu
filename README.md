@@ -1,7 +1,6 @@
 # docker-ubuntu
 
 [![License][license-img]][license-href]
-[![pipeline][pipeline-img]][pipeline-href]
 [![docker][docker-img]][docker-href]
 
 1. [Overview](#overview)
@@ -72,9 +71,9 @@ docker login
 
 ## Usage
 
-You first need to choose which dist between precise (12.04), trusty (14.04) and
-xenial (16.04)  you want  (xenial will  be the  'latest' tag)  and you  need to
-choose you user (or organization) name on Docker Hub.
+You first need to choose which dist between precise (12.04), trusty (14.04),
+xenial (16.04) and bionic (18.08) you want  (bionic will  be the  'latest' tag)
+and you  need to choose you user (or organization) name on Docker Hub.
 
 Show help.
 
@@ -82,16 +81,16 @@ Show help.
 ./build.sh -h
 ```
 
-Build your own Ubuntu image (eg. trusty).
+Build your own Ubuntu image (eg. xenial).
 
 ```bash
-./build.sh -d trusty -u vpgrp
+./build.sh -d xenial -u vptech
 ```
 
-Build your own Ubuntu image (eg. xenial) and push it on the Docker Hub.
+Build your own Ubuntu image (eg. bionic) and push it on the Docker Hub.
 
 ```bash
-./build.sh -d xenial -u vpgrp -p
+./build.sh -d bionic -u vptech -p
 ```
 
 ## Limitations
@@ -115,11 +114,9 @@ request.
    ╚═(███)═╝
 ```
 
-[license-img]: https://img.shields.io/badge/license-Apache-blue.svg
+[license-img]: https://img.shields.io/badge/license-ISC-blue.svg
 [license-href]: LICENSE
-[pipeline-img]: https://git.vpgrp.io/docker/docker-ubuntu/badges/master/pipeline.svg
-[pipeline-href]: https://git.vpgrp.io/docker/docker-ubuntu/commits/master
-[docker-img]: https://img.shields.io/docker/pulls/vpgrp/ubuntu.svg
-[docker-href]: https://registry.hub.docker.com/u/vpgrp/ubuntu
+[docker-img]: https://img.shields.io/docker/pulls/vptech/ubuntu.svg
+[docker-href]: https://hub.docker.com/r/vptech/ubuntu
 [overview-href]: https://www.ubuntu.com/
 [contribute-href]: CONTRIBUTING.md
