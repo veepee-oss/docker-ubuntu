@@ -2,92 +2,75 @@
 # https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
 
 .template: &build
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - image
+  stage: build
+  image: vpgrp/kitchen:latest
   before_script:
     - apt-get update
     - apt-get install -t stretch-backports -y debootstrap
     - apt-get install -t stretch-backports -y ubuntu-archive-keyring
-  image: vpgrp/kitchen:latest
-  stage: build
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - image
   variables:
     DOCKER_DRIVER: overlay
 
 .template: &deploy
-  before_script:
-    - docker login -u "$VPGRP_CI_USER" -p "$VPGRP_CI_PASSWORD"
-    - docker load -i image/precise.tar
-    - docker load -i image/trusty.tar
-    - docker load -i image/xenial.tar
-    - docker load -i image/bionic.tar
+  stage: deploy
   image: docker:latest
+  before_script:
+    - docker login -u "$REGISTRY_USERNAME" -p "$REGISTRY_PASSWORD"
+    - docker load -i image/v12.04.tar
+    - docker load -i image/v14.04.tar
+    - docker load -i image/v16.04.tar
+    - docker load -i image/v18.04.tar
   only:
     - master
   services:
     - docker:dind
-  stage: deploy
   variables:
     DOCKER_DRIVER: overlay
 
 stages:
-  - commit
-  - syntax
+  - test
   - build
   - deploy
 
-# commit
-git-history:
-  stage: commit
-  script:
-    - >
-      bash <(curl --fail --location --silent --show-error
-      https://git.io/vxIxF)
-
-lines-length:
-  stage: commit
-  script:
-    - >
-      bash <(curl --fail --location --silent --show-error
-      https://git.io/vxIxN)
-      *.list
-
-# syntax
+# test
 shellcheck:
-  stage: syntax
+  stage: test
   image: vpgrp/linter:shell
   script:
     - shellcheck build.sh
 
 # build
-precise:
+v12.04:
   <<: *build
   script:
-    - ./build.sh -d precise
+    - ./build.sh -d precise  -v
     - mkdir image
-    - docker save ubuntu:precise > image/precise.tar
+    - docker save ubuntu:precise > image/v12.04.tar
 
-trusty:
+v14.04:
   <<: *build
   script:
-    - ./build.sh -d trusty
+    - ./build.sh -d trusty -v
     - mkdir image
-    - docker save ubuntu:trusty > image/trusty.tar
+    - docker save ubuntu:trusty > image/v14.04.tar
 
-xenial:
+v16.04:
   <<: *build
   script:
-    - ./build.sh -d xenial
+    - ./build.sh -d xenial -v
     - mkdir image
-    - docker save ubuntu:xenial > image/xenial.tar
+    - docker save ubuntu:xenial > image/v16.04.tar
 
-bionic:
+v18.94:
   <<: *build
   script:
-    - ./build.sh -d bionic
+    - ./build.sh -d bionic -v
     - mkdir image
-    - docker save ubuntu:bionic > image/bionic.tar
+    - docker save ubuntu:bionic > image/v18.04.tar
 
 # deploy
 # https://hub.docker.com/u/vpgrp/
