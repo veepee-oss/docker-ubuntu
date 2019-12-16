@@ -28,6 +28,14 @@ OPTIONS:
    -d, --dist           Choose Ubuntu distribution
                         eg: precise, trusty, xenial, bionic
 
+   -e, --extra-packages space separated list of extra packages
+                        eg: -e foo bar baz
+                        default: none
+
+   -T  --extra-tag      Add a tag suffix to the created one
+                        eg: buster-stable => buster-stable-{tag}
+                        default: none
+
    -t, --timezone       Choose your preferred timezone
                         default: Europe/Amsterdam
 
@@ -58,6 +66,7 @@ function docker_bootstrap()
              apt-utils,\
              ca-certificates,\
              curl,\
+             git,\
              locales"
     exclude="debconf-i18n,\
              dmsetup,\
@@ -267,24 +276,24 @@ EOF
     ${sudo} tar -C "${image}" -c -f "${image}.tar" --numeric-owner .
 }
 
-# create image from bootstrap archive
+# create images from bootstrap archive
 function docker_import()
 {
-    echo "-- docker import ${image}" 1>&3
-    docker import "${image}.tar" "${user}ubuntu:${distname}"
-    docker run "${user}ubuntu:${distname}" \
-           echo " * build ${user}ubuntu:${distname}" 1>&3
-    docker tag "${user}ubuntu:${distname}" "${user}ubuntu:${distid}"
-    docker run "${user}ubuntu:${distid}" \
-           echo " * build ${user}ubuntu:${distid}" 1>&3
+    echo "-- docker import from ${image}" 1>&3
+    docker import "${image}.tar" "${user}ubuntu:${distname}${tag}"
+    docker run "${user}ubuntu:${distname}${tag}" \
+           echo " * build ${user}ubuntu:${distname}${tag}" 1>&3
+    docker tag "${user}ubuntu:${distname}${tag}" "${user}ubuntu:${distid}${tag}"
+    docker run "${user}ubuntu:${distid}${tag}" \
+           echo " * build ${user}ubuntu:${distid}${tag}" 1>&3
 
     for import in latest oldstable stable testing
     do
         if [ "${distname}" = "${!import}" ]
         then
-            docker tag "${user}ubuntu:${distname}" "${user}ubuntu:${import}"
-            docker run "${user}ubuntu:${import}" \
-                   echo " * build ${user}ubuntu:${import}" 1>&3
+            docker tag "${user}ubuntu:${distname}${tag}" "${user}ubuntu:${import}${tag}"
+            docker run "${user}ubuntu:${import}${tag}" \
+                   echo " * build ${user}ubuntu:${import}${tag}" 1>&3
         fi
     done
 }
@@ -293,22 +302,22 @@ function docker_import()
 function docker_push()
 {
     echo "-- docker push" 1>&3
-    echo " * push ${user}ubuntu:${distname}" 1>&3
-    docker push "${user}ubuntu:${distname}"
-    echo " * push ${user}ubuntu:${distid}" 1>&3
-    docker push "${user}ubuntu:${distid}"
+    echo " * push ${user}ubuntu:${distname}${tag}" 1>&3
+    docker push "${user}ubuntu:${distname}${tag}"
+    echo " * push ${user}ubuntu:${distid}${tag}" 1>&3
+    docker push "${user}ubuntu:${distid}${tag}"
 
     for push in latest oldstable stable testing
     do
         if [ "${distname}" = "${!push}"  ]
         then
-            echo " * push ${user}ubuntu:${push}" 1>&3
-            docker push "${user}ubuntu:${push}"
+            echo " * push ${user}ubuntu:${push}${tag}" 1>&3
+            docker push "${user}ubuntu:${push}${tag}"
         fi
     done
 }
 
-while getopts 'hd:t:u:plvV' OPTIONS
+while getopts 'hd:e:T:t:u:plvV' OPTIONS
 do
     case ${OPTIONS} in
         h)
@@ -319,6 +328,14 @@ do
         d)
             # -d / --dist
             dist=${OPTARG}
+            ;;
+        e)
+            # -e / --extra-packages
+            extra=${OPTARG}
+            ;;
+        T)
+            # -T / --tag
+            tag=${OPTARG}
             ;;
         t)
             # -t / --timezone
@@ -364,6 +381,12 @@ then
     exit 1
 fi
 
+# -e / --extra-packages
+if [ -z "${extra}" ]
+then
+    extra=''
+fi
+
 # -d / --dist
 if [ -n "${dist}" ]
 then
@@ -372,31 +395,33 @@ then
             distname='lucid'
             distid='10.04'
             mirror='http://old-releases.ubuntu.com/ubuntu'
-            include='apt-transport-https,git-core,gpgv'
+            include="apt-transport-https,git-core,gpgv,${extra}"
             ;;
         precise|12.04|12.04-lts)
             distname='precise'
             distid='12.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
-	        include='apt-transport-https,git-core'
+	        include="apt-transport-https,git-core,${extra}"
             ;;
         trusty|14.04|14.04-lts)
             distname='trusty'
             distid='14.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
-	    include='apt-transport-https,git-core'
+	        include="apt-transport-https,git-core,${extra}"
             ;;
         xenial|16.04|16.04-lts)
             distname='xenial'
             distid='16.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
-	        include='apt-transport-https,git-core'
+	        include="apt-transport-https,git-core,${extra}"
             ;;
         bionic|18.04|18.04-lts)
             distname='bionic'
             distid='18.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
+            include="${extra}"
             ;;
+
         *)
             usage
             exit 1
@@ -411,6 +436,15 @@ fi
 if [ -z "${timezone}" ]
 then
     timezone='Europe/Amsterdam'
+fi
+
+
+# -T / --tag
+if [ -z "${tag}" ]
+then
+    tag=''
+else
+    tag="-${tag}"
 fi
 
 # -u / --user
