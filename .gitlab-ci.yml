@@ -23,7 +23,9 @@
     - docker load -i image/ubuntu-v12.04.tar
     - docker load -i image/ubuntu-v14.04.tar
     - docker load -i image/ubuntu-v16.04.tar
+    - docker load -i image/ubuntu-v16.04-systemd.tar
     - docker load -i image/ubuntu-v18.04.tar
+    - docker load -i image/ubuntu-v18.04-systemd.tar
   only:
     - master
   services:
@@ -65,6 +67,13 @@ v16.04:
     - mkdir image
     - docker save ubuntu:xenial > image/ubuntu-v16.04.tar
 
+v16.04_systemd:
+  <<: *build
+  script:
+    - ./build.sh -d xenial -e "systemd" -T "systemd" -v
+    - mkdir image
+    - docker save ubuntu:xenial-systemd > image/ubuntu-v16.04-systemd.tar
+
 v18.04:
   <<: *build
   script:
@@ -72,50 +81,43 @@ v18.04:
     - mkdir image
     - docker save ubuntu:bionic > image/ubuntu-v18.04.tar
 
-# deploy
-# https://hub.docker.com/u/vpgrp/
-vpgrp:
-  <<: *deploy
+v18.04_systemd:
+  <<: *build
   script:
-    - docker tag ubuntu:precise vpgrp/ubuntu:precise
-    - docker tag ubuntu:precise vpgrp/ubuntu:12.04
-    - docker tag ubuntu:trusty  vpgrp/ubuntu:trusty
-    - docker tag ubuntu:trusty  vpgrp/ubuntu:14.04
-    - docker tag ubuntu:xenial  vpgrp/ubuntu:xenial
-    - docker tag ubuntu:xenial  vpgrp/ubuntu:16.04
-    - docker tag ubuntu:bionic  vpgrp/ubuntu:bionic
-    - docker tag ubuntu:bionic  vpgrp/ubuntu:18.04
-    - docker tag ubuntu:bionic  vpgrp/ubuntu:latest
-    - docker push vpgrp/ubuntu:precise
-    - docker push vpgrp/ubuntu:12.04
-    - docker push vpgrp/ubuntu:trusty
-    - docker push vpgrp/ubuntu:14.04
-    - docker push vpgrp/ubuntu:xenial
-    - docker push vpgrp/ubuntu:16.04
-    - docker push vpgrp/ubuntu:bionic
-    - docker push vpgrp/ubuntu:18.04
-    - docker push vpgrp/ubuntu:latest
+    - ./build.sh -d bionic -e "systemd" -T "systemd" -v
+    - mkdir image
+    - docker save ubuntu:bionic-systemd > image/ubuntu-v18.04-systemd.tar
+
+# deploy
 
 # https://hub.docker.com/u/vptech/
 vptech:
   <<: *deploy
   script:
-    - docker tag ubuntu:precise vptech/ubuntu:precise
-    - docker tag ubuntu:precise vptech/ubuntu:12.04
-    - docker tag ubuntu:trusty  vptech/ubuntu:trusty
-    - docker tag ubuntu:trusty  vptech/ubuntu:14.04
-    - docker tag ubuntu:xenial  vptech/ubuntu:xenial
-    - docker tag ubuntu:xenial  vptech/ubuntu:16.04
-    - docker tag ubuntu:bionic  vptech/ubuntu:bionic
-    - docker tag ubuntu:bionic  vptech/ubuntu:18.04
-    - docker tag ubuntu:bionic  vptech/ubuntu:latest
+    - docker tag ubuntu:precise         vptech/ubuntu:precise
+    - docker tag ubuntu:precise         vptech/ubuntu:12.04
+    - docker tag ubuntu:trusty          vptech/ubuntu:trusty
+    - docker tag ubuntu:trusty          vptech/ubuntu:14.04
+    - docker tag ubuntu:xenial          vptech/ubuntu:xenial
+    - docker tag ubuntu:xenial          vptech/ubuntu:16.04
+    - docker tag ubuntu:xenial-systemd  vptech/ubuntu:xenial-systemd
+    - docker tag ubuntu:xenial-systemd  vptech/ubuntu:16.04-systemd
+    - docker tag ubuntu:bionic          vptech/ubuntu:bionic
+    - docker tag ubuntu:bionic          vptech/ubuntu:18.04
+    - docker tag ubuntu:bionic-systemd  vptech/ubuntu:bionic-systemd
+    - docker tag ubuntu:bionic-systemd  vptech/ubuntu:18.04-systemd
+    - docker tag ubuntu:bionic          vptech/ubuntu:latest
     - docker push vptech/ubuntu:precise
     - docker push vptech/ubuntu:12.04
     - docker push vptech/ubuntu:trusty
     - docker push vptech/ubuntu:14.04
     - docker push vptech/ubuntu:xenial
     - docker push vptech/ubuntu:16.04
+    - docker push vptech/ubuntu:xenial-systemd
+    - docker push vptech/ubuntu:16.04-systemd
     - docker push vptech/ubuntu:bionic
     - docker push vptech/ubuntu:18.04
+    - docker push vptech/ubuntu:bionic-systemd
+    - docker push vptech/ubuntu:18.04-systemd
     - docker push vptech/ubuntu:latest
 # EOF
