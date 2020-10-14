@@ -3,7 +3,7 @@
 
 .template: &build
   stage: build
-  image: vpgrp/kitchen:latest
+  image: docker.registry.vptech.eu/vpgrp/kitchen:latest
   before_script:
     - apt-get update
     - apt-get install -t stretch-backports -y debootstrap
@@ -17,7 +17,7 @@
 
 .template: &deploy
   stage: deploy
-  image: docker:latest
+  image: docker.registry.vptech.eu/docker:latest
   before_script:
     - docker login -u "$REGISTRY_USERNAME" -p "$REGISTRY_PASSWORD"
     - docker load -i image/ubuntu-v12.04.tar
@@ -41,7 +41,7 @@ stages:
 # test
 shellcheck:
   stage: test
-  image: vpgrp/linter:shell
+  image: docker.registry.vptech.eu/vpgrp/linter:shell
   script:
     - shellcheck build.sh
 
