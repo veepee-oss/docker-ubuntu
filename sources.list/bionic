@@ -1,4 +1,4 @@
-deb http://mirror.vpgrp.io/ubuntu bionic main multiverse restricted universe
-deb http://mirror.vpgrp.io/ubuntu bionic-updates main multiverse restricted universe
-deb http://mirror.vpgrp.io/ubuntu bionic-backports main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu bionic main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu bionic-updates main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu bionic-backports main multiverse restricted universe
 deb http://security.ubuntu.com/ubuntu bionic-security main multiverse restricted universe

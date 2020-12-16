@@ -1,4 +1,4 @@
-deb http://mirror.vpgrp.io/ubuntu trusty main multiverse restricted universe
-deb http://mirror.vpgrp.io/ubuntu trusty-updates main multiverse restricted universe
-deb http://mirror.vpgrp.io/ubuntu trusty-backports main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu trusty main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu trusty-updates main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu trusty-backports main multiverse restricted universe
 deb http://security.ubuntu.com/ubuntu trusty-security main multiverse restricted universe

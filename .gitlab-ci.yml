@@ -1,17 +1,31 @@
 ---
-# https://docs.gitlab.com/ee/ci/docker/using_docker_build.html
+
+include:
+  - project: veepee/vptech/sre/iac/ci-cd/markdown-lint
+    ref: 1.2.2
+    file: gitlab-ci.yml
+  - project: veepee/vptech/sre/iac/ci-cd/semantic-release
+    ref: 3.2.1
+    file: gitlab-ci.yml
 
 .template: &build
   stage: build
-  image: docker.registry.vptech.eu/vpgrp/kitchen:latest
+  image: docker.registry.vptech.eu/vptech/debian:buster
   before_script:
-    - apt-get update
-    - apt-get install -t stretch-backports -y debootstrap
-    - apt-get install -t stretch-backports -y ubuntu-archive-keyring
+    - apt-get update  -qq -y
+    - apt-get install -qq -y apt-transport-https ca-certificates curl debootstrap kmod gnupg-agent procps software-properties-common sudo systemd tar
+    - ln -s /usr/share/debootstrap/scripts/gutsy /usr/share/debootstrap/scripts/focal
+    - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    - apt-get update  -qq -y
+    - apt-get install -qq -y docker-ce docker-ce-cli containerd.io
+    - env DOCKER_DRIVER=vfs dockerd &
   artifacts:
     expire_in: 1 day
     paths:
       - image
+  tags:
+    - dind
   variables:
     DOCKER_DRIVER: overlay
 
@@ -29,36 +43,33 @@
   only:
     - master
   services:
-    - docker:dind
+    - name: docker.registry.vptech.eu/docker:dind
+      alias: docker
+  tags:
+    - dind
   variables:
     DOCKER_DRIVER: overlay
 
 stages:
-  - test
+  - lint
   - build
   - deploy
-
-# test
-shellcheck:
-  stage: test
-  image: docker.registry.vptech.eu/vpgrp/linter:shell
-  script:
-    - shellcheck build.sh
+  - release
 
 # build
-v12.04:
-  <<: *build
-  script:
-    - ./build.sh -d precise  -v
-    - mkdir image
-    - docker save ubuntu:precise > image/ubuntu-v12.04.tar
+# v12.04:
+#   <<: *build
+#   script:
+#     - ./build.sh -d precise  -v
+#     - mkdir image
+#     - docker save ubuntu:precise > image/ubuntu-v12.04.tar
 
-v14.04:
-  <<: *build
-  script:
-    - ./build.sh -d trusty -v
-    - mkdir image
-    - docker save ubuntu:trusty > image/ubuntu-v14.04.tar
+# v14.04:
+#   <<: *build
+#   script:
+#     - ./build.sh -d trusty -v
+#     - mkdir image
+#     - docker save ubuntu:trusty > image/ubuntu-v14.04.tar
 
 v16.04:
   <<: *build
@@ -67,7 +78,7 @@ v16.04:
     - mkdir image
     - docker save ubuntu:xenial > image/ubuntu-v16.04.tar
 
-v16.04_systemd:
+v16.04:systemd:
   <<: *build
   script:
     - ./build.sh -d xenial -e "systemd" -T "systemd" -v
@@ -81,23 +92,35 @@ v18.04:
     - mkdir image
     - docker save ubuntu:bionic > image/ubuntu-v18.04.tar
 
-v18.04_systemd:
+v18.04:systemd:
   <<: *build
   script:
     - ./build.sh -d bionic -e "systemd" -T "systemd" -v
     - mkdir image
     - docker save ubuntu:bionic-systemd > image/ubuntu-v18.04-systemd.tar
 
-# deploy
+v20.04:
+  <<: *build
+  script:
+    - ./build.sh -d focal -v
+    - mkdir image
+    - docker save ubuntu:focal > image/ubuntu-v20.04.tar
 
-# https://hub.docker.com/u/vptech/
+v20.04:systemd:
+  <<: *build
+  script:
+    - ./build.sh -d focal -e "systemd" -T "systemd" -v
+    - mkdir image
+    - docker save ubuntu:focal-systemd > image/ubuntu-v20.04-systemd.tar
+
+# deploy
 vptech:
   <<: *deploy
   script:
-    - docker tag ubuntu:precise         vptech/ubuntu:precise
-    - docker tag ubuntu:precise         vptech/ubuntu:12.04
-    - docker tag ubuntu:trusty          vptech/ubuntu:trusty
-    - docker tag ubuntu:trusty          vptech/ubuntu:14.04
+    # - docker tag ubuntu:precise         vptech/ubuntu:precise
+    # - docker tag ubuntu:precise         vptech/ubuntu:12.04
+    # - docker tag ubuntu:trusty          vptech/ubuntu:trusty
+    # - docker tag ubuntu:trusty          vptech/ubuntu:14.04
     - docker tag ubuntu:xenial          vptech/ubuntu:xenial
     - docker tag ubuntu:xenial          vptech/ubuntu:16.04
     - docker tag ubuntu:xenial-systemd  vptech/ubuntu:xenial-systemd
@@ -106,18 +129,10 @@ vptech:
     - docker tag ubuntu:bionic          vptech/ubuntu:18.04
     - docker tag ubuntu:bionic-systemd  vptech/ubuntu:bionic-systemd
     - docker tag ubuntu:bionic-systemd  vptech/ubuntu:18.04-systemd
-    - docker tag ubuntu:bionic          vptech/ubuntu:latest
-    - docker push vptech/ubuntu:precise
-    - docker push vptech/ubuntu:12.04
-    - docker push vptech/ubuntu:trusty
-    - docker push vptech/ubuntu:14.04
-    - docker push vptech/ubuntu:xenial
-    - docker push vptech/ubuntu:16.04
-    - docker push vptech/ubuntu:xenial-systemd
-    - docker push vptech/ubuntu:16.04-systemd
-    - docker push vptech/ubuntu:bionic
-    - docker push vptech/ubuntu:18.04
-    - docker push vptech/ubuntu:bionic-systemd
-    - docker push vptech/ubuntu:18.04-systemd
-    - docker push vptech/ubuntu:latest
+    - docker tag ubuntu:focal           vptech/ubuntu:focal
+    - docker tag ubuntu:focal           vptech/ubuntu:20.04
+    - docker tag ubuntu:focal-systemd   vptech/ubuntu:focal-systemd
+    - docker tag ubuntu:focal-systemd   vptech/ubuntu:20.04-systemd
+    - docker tag ubuntu:focal           vptech/ubuntu:latest
+    - docker push --all-tags vptech/ubuntu
 # EOF

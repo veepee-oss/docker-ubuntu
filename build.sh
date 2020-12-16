@@ -7,10 +7,10 @@ set -e
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 arch='amd64'
-oldstable='xenial'
-stable='bionic'
-testing='bionic'
-version='4.0'
+oldstable='bionis'
+stable='focal'
+testing='focal'
+version='4.1'
 
 function usage()
 {
@@ -26,7 +26,7 @@ OPTIONS:
    -h, --help           Show help
 
    -d, --dist           Choose Ubuntu distribution
-                        eg: precise, trusty, xenial, bionic
+                        eg: precise, trusty, xenial, bionic, focal
 
    -e, --extra-packages space separated list of extra packages
                         eg: -e foo bar baz
@@ -265,7 +265,7 @@ EOF
     # unmount
     ${sudo} umount "${image}/dev/pts"
     ${sudo} umount "${image}/dev"
-    ${sudo} umount "${image}/proc"
+    # ${sudo} umount "${image}/proc"
     ${sudo} umount "${image}/sys"
 
     # create archive
@@ -280,6 +280,7 @@ EOF
 function docker_import()
 {
     echo "-- docker import from ${image}" 1>&3
+    mount -t proc proc /proc
     docker import "${image}.tar" "${user}ubuntu:${distname}${tag}"
     docker run "${user}ubuntu:${distname}${tag}" \
            echo " * build ${user}ubuntu:${distname}${tag}" 1>&3
@@ -421,7 +422,12 @@ then
             mirror='http://mirror.vpgrp.io/ubuntu'
             include="${extra}"
             ;;
-
+        focal|20.04|20.04-lts)
+            distname='focal'
+            distid='20.04'
+            mirror='http://mirror.vpgrp.io/ubuntu'
+            include="${extra}"
+            ;;
         *)
             usage
             exit 1
@@ -456,7 +462,7 @@ fi
 # -l / --latest
 if [ -z "${latest}" ]
 then
-    latest='bionic'
+    latest='focal'
 fi
 
 # -v / --verbose

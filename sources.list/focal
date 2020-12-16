@@ -1,0 +1,4 @@
+deb http://mirror.vptech.eu/ubuntu focal main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu focal-updates main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu focal-backports main multiverse restricted universe
+deb http://security.ubuntu.com/ubuntu focal-security main multiverse restricted universe
