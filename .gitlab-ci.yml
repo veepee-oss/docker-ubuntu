@@ -33,13 +33,13 @@ include:
   stage: deploy
   image: docker.registry.vptech.eu/docker:latest
   before_script:
-    - docker login -u "$REGISTRY_USERNAME" -p "$REGISTRY_PASSWORD"
-    - docker load -i image/ubuntu-v12.04.tar
-    - docker load -i image/ubuntu-v14.04.tar
+    - docker login -u "$DOCKER_PUBLIC_REGISTRY_USERNAME" -p "$DOCKER_PUBLIC_REGISTRY_PASSWORD"
     - docker load -i image/ubuntu-v16.04.tar
     - docker load -i image/ubuntu-v16.04-systemd.tar
     - docker load -i image/ubuntu-v18.04.tar
     - docker load -i image/ubuntu-v18.04-systemd.tar
+    - docker load -i image/ubuntu-v20.04.tar
+    - docker load -i image/ubuntu-v20.04-systemd.tar
   only:
     - master
   services:
@@ -57,20 +57,6 @@ stages:
   - release
 
 # build
-# v12.04:
-#   <<: *build
-#   script:
-#     - ./build.sh -d precise  -v
-#     - mkdir image
-#     - docker save ubuntu:precise > image/ubuntu-v12.04.tar
-
-# v14.04:
-#   <<: *build
-#   script:
-#     - ./build.sh -d trusty -v
-#     - mkdir image
-#     - docker save ubuntu:trusty > image/ubuntu-v14.04.tar
-
 v16.04:
   <<: *build
   script:
@@ -117,10 +103,6 @@ v20.04:systemd:
 vptech:
   <<: *deploy
   script:
-    # - docker tag ubuntu:precise         vptech/ubuntu:precise
-    # - docker tag ubuntu:precise         vptech/ubuntu:12.04
-    # - docker tag ubuntu:trusty          vptech/ubuntu:trusty
-    # - docker tag ubuntu:trusty          vptech/ubuntu:14.04
     - docker tag ubuntu:xenial          vptech/ubuntu:xenial
     - docker tag ubuntu:xenial          vptech/ubuntu:16.04
     - docker tag ubuntu:xenial-systemd  vptech/ubuntu:xenial-systemd
