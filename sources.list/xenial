@@ -1,4 +1,4 @@
-deb http://mirror.vpgrp.io/ubuntu xenial main multiverse restricted universe
-deb http://mirror.vpgrp.io/ubuntu xenial-updates main multiverse restricted universe
-deb http://mirror.vpgrp.io/ubuntu xenial-backports main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu xenial main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu xenial-updates main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu xenial-backports main multiverse restricted universe
 deb http://security.ubuntu.com/ubuntu xenial-security main multiverse restricted universe

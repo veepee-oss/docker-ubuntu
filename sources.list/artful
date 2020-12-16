@@ -1,4 +1,4 @@
-deb http://mirror.vpgrp.io/ubuntu artful main multiverse restricted universe
-deb http://mirror.vpgrp.io/ubuntu artful-updates main multiverse restricted universe
-deb http://mirror.vpgrp.io/ubuntu artful-backports main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu artful main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu artful-updates main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu artful-backports main multiverse restricted universe
 deb http://security.ubuntu.com/ubuntu artful-security main multiverse restricted universe
