@@ -5,7 +5,7 @@ include:
     ref: 1.3.0
     file: gitlab-ci.yml
   - project: veepee/vptech/sre/iac/ci-cd/semantic-release
-    ref: 3.6.0
+    ref: 3.9.0
     file: gitlab-ci.yml
 
 .template: &build
