@@ -1,4 +1,4 @@
-# docker-ubuntu
+# ubuntu
 
 1. [Overview](#overview)
 1. [Description](#description)
