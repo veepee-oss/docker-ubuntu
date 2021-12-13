@@ -8,6 +8,9 @@ include:
     ref: 3.10.0
     file: gitlab-ci.yml
 
+variables:
+  SEMANTIC_CONFIG_FILE: changelog
+
 .template: &build
   stage: build
   image: docker.registry.vptech.eu/vptech/debian:buster
@@ -57,42 +60,42 @@ stages:
   - release
 
 # build
-v16.04:
+build:16.04:
   <<: *build
   script:
     - ./build.sh -d xenial -v
     - mkdir image
     - docker save ubuntu:xenial > image/ubuntu-v16.04.tar
 
-v16.04:systemd:
+build:16.04-systemd:
   <<: *build
   script:
     - ./build.sh -d xenial -e "systemd" -T "systemd" -v
     - mkdir image
     - docker save ubuntu:xenial-systemd > image/ubuntu-v16.04-systemd.tar
 
-v18.04:
+build:18.04:
   <<: *build
   script:
     - ./build.sh -d bionic -v
     - mkdir image
     - docker save ubuntu:bionic > image/ubuntu-v18.04.tar
 
-v18.04:systemd:
+build:18.04-systemd:
   <<: *build
   script:
     - ./build.sh -d bionic -e "systemd" -T "systemd" -v
     - mkdir image
     - docker save ubuntu:bionic-systemd > image/ubuntu-v18.04-systemd.tar
 
-v20.04:
+build:20.04:
   <<: *build
   script:
     - ./build.sh -d focal -v
     - mkdir image
     - docker save ubuntu:focal > image/ubuntu-v20.04.tar
 
-v20.04:systemd:
+build:20.04-systemd:
   <<: *build
   script:
     - ./build.sh -d focal -e "systemd" -T "systemd" -v
