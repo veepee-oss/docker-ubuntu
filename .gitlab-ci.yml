@@ -1,15 +1,15 @@
 ---
 
 include:
-  - project: veepee/vptech/sre/iac/ci-cd/markdown-lint
-    ref: 1.4.0
+  - project: veepee/vptech/ci-cd/markdown-lint
+    ref: 1-latest
     file: gitlab-ci.yml
-  - project: veepee/vptech/sre/iac/ci-cd/semantic-release
-    ref: 3.11.0
+  - project: veepee/vptech/ci-cd/semantic-release
+    ref: 2-latest
     file: gitlab-ci.yml
-
-variables:
-  SEMANTIC_CONFIG_FILE: changelog
+  - project: veepee/vptech/ci-cd/shellcheck
+    ref: 1-latest
+    file: gitlab-ci.yml
 
 .template: &build
   stage: build
@@ -37,13 +37,12 @@ variables:
   image: docker.registry.vptech.eu/docker:latest
   before_script:
     - docker login -u "$DOCKER_PUBLIC_REGISTRY_USERNAME" -p "$DOCKER_PUBLIC_REGISTRY_PASSWORD"
-    - docker load -i image/ubuntu-v16.04.tar
-    - docker load -i image/ubuntu-v16.04-systemd.tar
     - docker load -i image/ubuntu-v18.04.tar
     - docker load -i image/ubuntu-v18.04-systemd.tar
     - docker load -i image/ubuntu-v20.04.tar
     - docker load -i image/ubuntu-v20.04-systemd.tar
   only:
+    - main
     - master
   services:
     - name: docker.registry.vptech.eu/docker:dind
@@ -58,21 +57,6 @@ stages:
   - build
   - deploy
   - release
-
-# build
-build:16.04:
-  <<: *build
-  script:
-    - ./build.sh -d xenial -v
-    - mkdir image
-    - docker save ubuntu:xenial > image/ubuntu-v16.04.tar
-
-build:16.04-systemd:
-  <<: *build
-  script:
-    - ./build.sh -d xenial -e "systemd" -T "systemd" -v
-    - mkdir image
-    - docker save ubuntu:xenial-systemd > image/ubuntu-v16.04-systemd.tar
 
 build:18.04:
   <<: *build
@@ -102,14 +86,10 @@ build:20.04-systemd:
     - mkdir image
     - docker save ubuntu:focal-systemd > image/ubuntu-v20.04-systemd.tar
 
-# deploy
+# https://hub.docker.com/u/vptech/
 vptech:
   <<: *deploy
   script:
-    - docker tag ubuntu:xenial          vptech/ubuntu:xenial
-    - docker tag ubuntu:xenial          vptech/ubuntu:16.04
-    - docker tag ubuntu:xenial-systemd  vptech/ubuntu:xenial-systemd
-    - docker tag ubuntu:xenial-systemd  vptech/ubuntu:16.04-systemd
     - docker tag ubuntu:bionic          vptech/ubuntu:bionic
     - docker tag ubuntu:bionic          vptech/ubuntu:18.04
     - docker tag ubuntu:bionic-systemd  vptech/ubuntu:bionic-systemd
