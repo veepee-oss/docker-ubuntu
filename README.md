@@ -1,14 +1,5 @@
 # ubuntu
 
-1. [Overview](#overview)
-1. [Description](#description)
-1. [Tags](#tags)
-1. [Setup](#setup)
-1. [Usage](#usage)
-1. [Limitations](#limitations)
-1. [Development](#development)
-1. [Miscellaneous](#miscellaneous)
-
 ## Overview
 
 Ubuntu is  a Debian-based  free operating  system (OS)  for your  computer.  An
@@ -69,9 +60,10 @@ docker login
 
 ## Usage
 
-You first need to choose which dist between precise (12.04), trusty (14.04),
-xenial (16.04) and bionic (18.08) you want  (bionic will  be the  'latest' tag)
-and you  need to choose you user (or organization) name on Docker Hub.
+You first  need to choose which  dist between precise (12.04),  trusty (14.04),
+xenial  (16.04), bionic  (18.08)  focal (20.04)  you want  (focal  will be  the
+'latest' tag) and you need to choose  you user (or organization) name on Docker
+Hub.
 
 Show help.
 
@@ -97,12 +89,12 @@ Only work on Debian, Devuan and Ubuntu.
 
 ## Development
 
-Please read carefully [CONTRIBUTING.md](CONTRIBUTING.md) before making a merge
+Please read carefully [CONTRIBUTING.md](CONTRIBUTING.md)  before making a merge
 request.
 
 ## Miscellaneous
 
-```
+```text
     ╚⊙ ⊙╝
   ╚═(███)═╝
  ╚═(███)═╝
