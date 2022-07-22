@@ -13,13 +13,12 @@ include:
 
 .template: &build
   stage: build
-  image: docker.registry.vptech.eu/vptech/debian:buster
+  image: docker.registry.vptech.eu/ubuntu:focal
   before_script:
     - apt-get update  -qq -y
     - apt-get install -qq -y apt-transport-https ca-certificates curl debootstrap kmod gnupg-agent procps software-properties-common sudo systemd tar
-    - ln -s /usr/share/debootstrap/scripts/gutsy /usr/share/debootstrap/scripts/focal
     - curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+    - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     - apt-get update  -qq -y
     - apt-get install -qq -y docker-ce docker-ce-cli containerd.io
     - env DOCKER_DRIVER=vfs dockerd &
@@ -28,7 +27,7 @@ include:
     paths:
       - image
   tags:
-    - dind
+    - virt-enabled
   variables:
     DOCKER_DRIVER: overlay
 
@@ -41,6 +40,8 @@ include:
     - docker load -i image/ubuntu-v18.04-systemd.tar
     - docker load -i image/ubuntu-v20.04.tar
     - docker load -i image/ubuntu-v20.04-systemd.tar
+    - docker load -i image/ubuntu-v22.04.tar
+    - docker load -i image/ubuntu-v22.04-systemd.tar
   only:
     - main
     - master
@@ -86,6 +87,20 @@ build:20.04-systemd:
     - mkdir image
     - docker save ubuntu:focal-systemd > image/ubuntu-v20.04-systemd.tar
 
+build:22.04:
+  <<: *build
+  script:
+    - ./build.sh -d jammy -v
+    - mkdir image
+    - docker save ubuntu:jammy > image/ubuntu-v22.04.tar
+
+build:22.04-systemd:
+  <<: *build
+  script:
+    - ./build.sh -d jammy -e "systemd" -T "systemd" -v
+    - mkdir image
+    - docker save ubuntu:jammy-systemd > image/ubuntu-v22.04-systemd.tar
+
 # https://hub.docker.com/u/vptech/
 vptech:
   <<: *deploy
@@ -98,6 +113,10 @@ vptech:
     - docker tag ubuntu:focal           vptech/ubuntu:20.04
     - docker tag ubuntu:focal-systemd   vptech/ubuntu:focal-systemd
     - docker tag ubuntu:focal-systemd   vptech/ubuntu:20.04-systemd
-    - docker tag ubuntu:focal           vptech/ubuntu:latest
+    - docker tag ubuntu:jammy           vptech/ubuntu:jammy
+    - docker tag ubuntu:jammy           vptech/ubuntu:22.04
+    - docker tag ubuntu:jammy-systemd   vptech/ubuntu:jammy-systemd
+    - docker tag ubuntu:jammy-systemd   vptech/ubuntu:22.04-systemd
+    - docker tag ubuntu:jammy           vptech/ubuntu:latest
     - docker push --all-tags vptech/ubuntu
 # EOF

@@ -1,0 +1,4 @@
+deb http://mirror.vptech.eu/ubuntu jammy main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu jammy-updates main multiverse restricted universe
+deb http://mirror.vptech.eu/ubuntu jammy-backports main multiverse restricted universe
+deb http://security.ubuntu.com/ubuntu jammy-security main multiverse restricted universe
