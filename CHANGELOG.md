@@ -1,3 +1,20 @@
+# [1.1.0](https://git.vptech.eu/veepee/vptech/container-images/ubuntu/compare/1.0.1...1.1.0) (2022-07-22)
+
+
+### Chores
+
+* **deps:** update dependency veepee/vptech/sre/iac/ci-cd/semantic-release to v3.11.0 ([491a456](https://git.vptech.eu/veepee/vptech/container-images/ubuntu/commit/491a456522f9c497e0f864072097e9fe23350ea6))
+
+
+### Documentation
+
+* change ownership ([baed7b0](https://git.vptech.eu/veepee/vptech/container-images/ubuntu/commit/baed7b0f455badc6b7a1e849ca4d052d3a063a64))
+
+
+### Features
+
+* add Ubuntu 22.04 ([2295b60](https://git.vptech.eu/veepee/vptech/container-images/ubuntu/commit/2295b60e87217c6c56d5c09595a43981cf663ed7))
+
 ## [1.0.1](https://git.vptech.eu/veepee/vptech/sre/iac/docker-images/ubuntu/compare/1.0.0...1.0.1) (2021-12-13)
 
 
