@@ -7,10 +7,10 @@ set -e
 PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
 arch='amd64'
-oldstable='bionis'
-stable='focal'
-testing='focal'
-version='4.1'
+oldstable='focal'
+stable='jammy'
+testing='jammy'
+version='4.2'
 
 function usage()
 {
@@ -26,7 +26,7 @@ OPTIONS:
    -h, --help           Show help
 
    -d, --dist           Choose Ubuntu distribution
-                        eg: precise, trusty, xenial, bionic, focal
+                        eg: precise, trusty, xenial, bionic, focal, jammy
 
    -e, --extra-packages space separated list of extra packages
                         eg: -e foo bar baz
@@ -46,7 +46,7 @@ OPTIONS:
                         default: no
 
    -l, --latest         Force the "latest"
-                        default: bionic
+                        default: jammy
 
    -v, --verbose        Verbose mode
 
@@ -273,7 +273,7 @@ EOF
     then
         ${sudo} rm "${image}.tar"
     fi
-    ${sudo} tar -C "${image}" -c -f "${image}.tar" --numeric-owner .
+    ${sudo} tar --verbose --directory="${image}" --exclude='./proc' --create --file="${image}.tar" --numeric-owner .
 }
 
 # create images from bootstrap archive
@@ -402,19 +402,19 @@ then
             distname='precise'
             distid='12.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
-	        include="apt-transport-https,git-core,${extra}"
+            include="apt-transport-https,git-core,${extra}"
             ;;
         trusty|14.04|14.04-lts)
             distname='trusty'
             distid='14.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
-	        include="apt-transport-https,git-core,${extra}"
+            include="apt-transport-https,git-core,${extra}"
             ;;
         xenial|16.04|16.04-lts)
             distname='xenial'
             distid='16.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
-	        include="apt-transport-https,git-core,${extra}"
+            include="apt-transport-https,git-core,${extra}"
             ;;
         bionic|18.04|18.04-lts)
             distname='bionic'
@@ -425,6 +425,12 @@ then
         focal|20.04|20.04-lts)
             distname='focal'
             distid='20.04'
+            mirror='http://mirror.vpgrp.io/ubuntu'
+            include="${extra}"
+            ;;
+        jammy|22.04|22.04-lts)
+            distname='jammy'
+            distid='22.04'
             mirror='http://mirror.vpgrp.io/ubuntu'
             include="${extra}"
             ;;
@@ -462,7 +468,7 @@ fi
 # -l / --latest
 if [ -z "${latest}" ]
 then
-    latest='focal'
+    latest='jammy'
 fi
 
 # -v / --verbose

@@ -23,7 +23,8 @@ Supported tags.
 - 14.04, trusty
 - 16.04, xenial
 - 18.04, bionic
-- 20.04, focal, latest
+- 20.04, focal
+- 22.04, jammy, latest
 
 ## Setup
 
@@ -61,9 +62,9 @@ docker login
 ## Usage
 
 You first  need to choose which  dist between precise (12.04),  trusty (14.04),
-xenial  (16.04), bionic  (18.08)  focal (20.04)  you want  (focal  will be  the
-'latest' tag) and you need to choose  you user (or organization) name on Docker
-Hub.
+xenial (16.04),  bionic (18.08), focal  (20.04), jammy (22.04) you  want (jammy
+will be  the 'latest' tag)  and you need to  choose you user  (or organization)
+name on Docker Hub.
 
 Show help.
 
