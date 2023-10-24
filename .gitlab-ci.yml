@@ -8,7 +8,7 @@ include:
     ref: 2-latest
     file: gitlab-ci.yml
   - project: veepee/vptech/ci-cd/shellcheck
-    ref: 2.0.1
+    ref: 2-latest
     file: gitlab-ci.yml
 
 .template: &build
